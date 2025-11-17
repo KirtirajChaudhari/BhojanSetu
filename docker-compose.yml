@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: posdb
+      POSTGRES_USER: posuser
+      POSTGRES_PASSWORD: pospassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    command: gunicorn backend.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgres://posuser:pospassword@db:5432/posdb
+      DJANGO_DEBUG: '1'
+      DEFAULT_FROM_EMAIL: 'no-reply@example.com'
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
